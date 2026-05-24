@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {ScoreSystem} from "../src/ScoreSystem.sol";
@@ -20,7 +20,7 @@ contract ScoreSystemTest is Test {
         vm.prank(user1);
         game.register();
 
-        (uint256 score, bool isMember, bool wonTshirt) = game.getPlayerData(user1);
+        (uint256 score, bool isMember, bool wonTshirt, ) = game.getPlayerData(user1);
         assertTrue(isMember);
         assertEq(score, 0);
         assertFalse(wonTshirt);
@@ -32,7 +32,7 @@ contract ScoreSystemTest is Test {
 
         game.adminGivePoints(user1, 100);
 
-        (uint256 score,,) = game.getPlayerData(user1);
+        (uint256 score,,,) = game.getPlayerData(user1);
         assertEq(score, 100);
     }
 
@@ -59,8 +59,8 @@ contract ScoreSystemTest is Test {
         vm.prank(user1);
         game.transferPoints(user2, 40);
 
-        (uint256 score1,,) = game.getPlayerData(user1);
-        (uint256 score2,,) = game.getPlayerData(user2);
+        (uint256 score1,,,) = game.getPlayerData(user1);
+        (uint256 score2,,,) = game.getPlayerData(user2);
 
         assertEq(score1, 60);
         assertEq(score2, 40);
@@ -75,7 +75,7 @@ contract ScoreSystemTest is Test {
         vm.prank(user1);
         game.buyTshirt();
 
-        (uint256 score,, bool wonTshirt) = game.getPlayerData(user1);
+        (uint256 score,, bool wonTshirt,) = game.getPlayerData(user1);
 
         assertTrue(wonTshirt);
         assertEq(score, 0);
@@ -110,7 +110,6 @@ contract ScoreSystemTest is Test {
         game.register();
 
         vm.prank(user1);
-
         game.playGame(1);
     }
 
@@ -123,5 +122,29 @@ contract ScoreSystemTest is Test {
         vm.expectRevert("Guess must be 1, 2, or 3");
         game.playGame(4);
     }
-}
 
+    function test_RevertIfCooldownActive() public {
+        vm.prank(user1);
+        game.register();
+
+        vm.prank(user1);
+        game.playGame(1);
+
+        vm.prank(user1);
+        vm.expectRevert("Cooldown active: You can only play once every 24 hours");
+        game.playGame(2);
+    }
+
+    function test_PlayGameAfterCooldownPasses() public {
+        vm.prank(user1);
+        game.register();
+
+        vm.prank(user1);
+        game.playGame(1);
+
+        vm.warp(block.timestamp + 1 days);
+
+        vm.prank(user1);
+        game.playGame(2);
+    }
+}

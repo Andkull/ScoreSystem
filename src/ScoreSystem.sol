@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
 contract ScoreSystem {
     struct Player {
         uint256 score;
         bool registered;
         bool wonTshirt;
+        uint256 lastPlayed;
     }
 
     address private admin;
     uint256 public constant TSHIRT_COST = 50;
+    uint256 public constant COOLDOWN_TIME = 1 days;
 
     mapping(address => Player) private players;
 
@@ -39,12 +41,17 @@ contract ScoreSystem {
         players[msg.sender].registered = true;
         players[msg.sender].score = 0;
         players[msg.sender].wonTshirt = false;
+        players[msg.sender].lastPlayed = 0;
 
         emit MemberRegistered(msg.sender);
     }
 
     function playGame(uint256 guess) external onlyMember {
         require(guess >= 1 && guess <= 3, "Guess must be 1, 2, or 3");
+        
+        require(players[msg.sender].lastPlayed == 0 || block.timestamp >= players[msg.sender].lastPlayed + COOLDOWN_TIME, "Cooldown active: You can only play once every 24 hours");
+
+        players[msg.sender].lastPlayed = block.timestamp;
 
         uint256 result = (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 3) + 1;
 
@@ -82,8 +89,8 @@ contract ScoreSystem {
         emit PointsDistributed(to, amount);
     }
 
-    function getPlayerData(address user) external view returns (uint256, bool, bool) {
+    function getPlayerData(address user) external view returns (uint256, bool, bool, uint256) {
         Player memory p = players[user];
-        return (p.score, p.registered, p.wonTshirt);
+        return (p.score, p.registered, p.wonTshirt, p.lastPlayed);
     }
 }
