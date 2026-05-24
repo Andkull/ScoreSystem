@@ -1,66 +1,52 @@
-## Foundry
+# ScoreSystem Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A decentralized guessing game built with Solidity and the [Foundry](https://book.getfoundry.sh/) development framework. This project was built to demonstrate core smart contract mechanics including state management, access control, time-based restrictions (cooldowns), and comprehensive unit testing.
 
-Foundry consists of:
+## 🎮 Features
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- **User Registration:** Players must register before interacting with the game.
+- **Daily Guessing Game:** Players guess a number between 1 and 3. A correct guess rewards the player with 10 points. Includes a strict 24-hour cooldown preventing spam.
+- **Point Economy:** Players can securely transfer their earned points to other registered members.
+- **Rewards Store:** Players who accumulate 50 points can redeem them for a virtual T-Shirt.
+- **Admin Controls:** The contract deployer retains administrative rights to distribute points manually.
 
-## Documentation
+> **Note on Randomness:** For simplicity and local demonstration purposes, this project uses `block.timestamp` alongside `msg.sender` to generate pseudo-random numbers. In a mainnet production environment, a verifiable randomness oracle (such as Chainlink VRF) would be implemented to prevent validator manipulation.
 
-https://book.getfoundry.sh/
+## 🛠️ Prerequisites
 
-## Usage
+You will need to have [Foundry](https://book.getfoundry.sh/getting-started/installation) installed on your machine.
 
-### Build
+## 🚀 Quick Start
 
+1. Install Dependencies
+
+Make sure you have the standard Foundry testing libraries installed:
 ```shell
-$ forge build
+forge install
 ```
 
-### Test
+2. Build the Project
 
+Compile the smart contracts to ensure everything is structurally sound:
 ```shell
-$ forge test
+forge build
 ```
 
-### Format
+3. Run Tests
 
+The project includes a robust test suite testing access controls, point transfers, and time-manipulation for the 24-hour cooldown logic. Run the tests via:
 ```shell
-$ forge fmt
+forge test
+```
+To see a detailed trace of the tests (including gas usage and specific function calls), run:
+```shell
+forge test -vvv
 ```
 
-### Gas Snapshots
+4. Local Deployment & Testing
 
+To interact with the contract locally, you can start Foundry's local Ethereum node:
 ```shell
-$ forge snapshot
+anvil
 ```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Once Anvil is running, you can connect tools like Remix IDE to your local node to manually interact with the contract's functions, or use Foundry's built-in cast CLI.
