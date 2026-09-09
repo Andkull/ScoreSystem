@@ -1,0 +1,409 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f5f7fb;
+    background: #0b0e14;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 20% 0%, #1b2340 0%, transparent 35%),
+        radial-gradient(circle at 90% 20%, #14283b 0%, transparent 30%),
+        #0b0e14;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.header {
+    width: 100%;
+    border-bottom: 1px solid #202631;
+    background: rgba(11, 14, 20, 0.85);
+    backdrop-filter: blur(12px);
+}
+
+.headerInner {
+    max-width: 1200px;
+    height: 76px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logoMark {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #6d5dfc;
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.logoTitle {
+    display: block;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.logoSubtitle {
+    display: block;
+    margin-top: 2px;
+    color: #7e8797;
+    font-size: 11px;
+}
+
+.navigation {
+    display: flex;
+    gap: 32px;
+}
+
+.navigation a {
+    color: #8e97a8;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.navigation a:hover {
+    color: white;
+}
+
+.walletButton,
+.primaryButton,
+.secondaryButton {
+    border: none;
+    border-radius: 9px;
+    padding: 11px 18px;
+    font-weight: 600;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        background 0.2s ease;
+}
+
+.walletButton:hover,
+.primaryButton:hover,
+.secondaryButton:hover {
+    transform: translateY(-1px);
+}
+
+.walletButton {
+    background: #ffffff;
+    color: #10131a;
+}
+
+.main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 70px 24px;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+    margin-bottom: 55px;
+}
+
+.eyebrow,
+.cardLabel {
+    color: #7d6cff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.hero h1 {
+    margin-top: 10px;
+    font-size: clamp(42px, 6vw, 68px);
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.heroText {
+    max-width: 570px;
+    margin-top: 20px;
+    color: #8e97a8;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.scoreCard {
+    min-width: 210px;
+    padding: 28px;
+
+    border: 1px solid #282f3b;
+    border-radius: 18px;
+    background: #11151d;
+    text-align: center;
+}
+
+.scoreCard span {
+    display: block;
+    color: #8e97a8;
+    font-size: 13px;
+}
+
+.scoreCard strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 48px;
+    line-height: 1;
+}
+
+.scoreCard small {
+    color: #7d6cff;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    padding: 28px;
+    border: 1px solid #252c37;
+    border-radius: 16px;
+    background: #11151d;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.card h2 {
+    margin-top: 8px;
+    font-size: 22px;
+}
+
+.description {
+    margin-top: 12px;
+    color: #818b9d;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.cooldown {
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #1b202a;
+    color: #8e97a8;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.numberButtons {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.numberButtons button {
+    width: 60px;
+    height: 60px;
+
+    border: 1px solid #303846;
+    border-radius: 10px;
+    background: #171c25;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+
+    transition: all 0.2s ease;
+}
+
+.numberButtons button:hover {
+    border-color: #7d6cff;
+    background: #1d1c35;
+}
+
+.primaryButton {
+    margin-top: 20px;
+    background: #6d5dfc;
+    color: white;
+}
+
+.primaryButton:hover {
+    background: #7c6dff;
+}
+
+.secondaryButton {
+    background: #1a202a;
+    color: #f2f4f8;
+    border: 1px solid #303846;
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    margin-top: 25px;
+}
+
+.profileInfo div {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #222832;
+}
+
+.profileInfo span {
+    color: #818b9d;
+    font-size: 13px;
+}
+
+.profileInfo strong {
+    font-size: 13px;
+}
+
+.profileCard .secondaryButton {
+    margin-top: 22px;
+}
+
+.transferCard {
+    grid-column: 1;
+}
+
+.transferCard label {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 7px;
+    color: #aab1bf;
+    font-size: 12px;
+}
+
+.transferCard input {
+    width: 100%;
+    padding: 12px 14px;
+
+    border: 1px solid #303846;
+    border-radius: 8px;
+    outline: none;
+
+    background: #0c1016;
+    color: white;
+}
+
+.transferCard input:focus {
+    border-color: #6d5dfc;
+}
+
+.transferCard input::placeholder {
+    color: #535c6b;
+}
+
+.rewardCard {
+    grid-column: 2;
+}
+
+.rewardIcon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+    background: #1d1b31;
+    font-size: 22px;
+}
+
+.rewardBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #252c37;
+}
+
+.rewardBottom span {
+    color: #8e97a8;
+    font-size: 13px;
+}
+
+.rewardBottom .secondaryButton {
+    margin: 0;
+}
+
+@media (max-width: 800px) {
+    .navigation {
+        display: none;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .scoreCard {
+        width: 100%;
+    }
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .transferCard,
+    .rewardCard {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 500px) {
+    .headerInner {
+        padding: 0 16px;
+    }
+
+    .walletButton {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .main {
+        padding: 45px 16px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+}
