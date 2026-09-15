@@ -1,6 +1,8 @@
 import type { Address } from 'viem';
 import { hasWallet } from '../../blockchain/viem';
 import { shortenAddress } from '../../utils/format';
+import { Avatar } from '../ui/Avatar';
+import { WalletIcon } from '../ui/Icons';
 
 type HeaderProps = {
   address?: Address;
@@ -27,21 +29,28 @@ export function HeaderComponent({ address, onConnect }: HeaderProps) {
           <div className='logoMark'>S</div>
           <div>
             <span className='logoTitle'>ScoreSystem</span>
-            <span className='logoSubtitle'>Web3 Game</span>
+            <span className='logoSubtitle'>On-chain daily game</span>
           </div>
         </div>
 
-        <nav className='navigation'>
-          <a href='#game'>Game</a>
-          <a href='#profile'>Profile</a>
-          <a href='#rewards'>Rewards</a>
-        </nav>
-
-        <button className='walletButton' onClick={handleConnect}>
-          {address
-            ? shortenAddress(address)
-            : hasWallet() ? 'Connect Wallet' : 'No Wallet Found'}
-        </button>
+        {address ? (
+          <button
+            className='walletButton connected'
+            onClick={handleConnect}
+            title={address}
+          >
+            <Avatar address={address} size={22} />
+            <span className='walletAddress'>{shortenAddress(address)}</span>
+          </button>
+        ) : (
+          <button
+            className={`walletButton ${hasWallet() ? '' : 'noWallet'}`}
+            onClick={handleConnect}
+          >
+            <WalletIcon size={16} />
+            {hasWallet() ? 'Connect Wallet' : 'No Wallet Found'}
+          </button>
+        )}
       </div>
     </header>
   );

@@ -7,6 +7,8 @@ import {
 } from '../../blockchain/contractFunctions';
 import { useNow } from '../../hooks/useNow';
 import { useTransaction } from '../../hooks/useTransaction';
+import { CardHeading } from '../ui/CardHeading';
+import { CheckIcon, ClockIcon, CrossIcon, DiceIcon } from '../ui/Icons';
 
 type GameProps = {
   address?: Address;
@@ -62,46 +64,64 @@ export function GameComponent({
   }
 
   return (
-    <div id='game' className='card gameCard'>
-      <div className='cardHeader'>
-        <div>
-          <p className='cardLabel'>DAILY GAME</p>
-          <h2>Guess the Number</h2>
-        </div>
-
-        <span className={`cooldown ${ready ? 'ready' : ''}`}>
-          {ready
-            ? 'Ready to play'
-            : onCooldown
-              ? `Next play in ${formatDuration(secondsLeft)}`
-              : '24h cooldown'}
-        </span>
-      </div>
+    <div className='card gameCard'>
+      <CardHeading
+        icon={<DiceIcon />}
+        label='DAILY GAME'
+        title='Guess the Number'
+        aside={
+          <span className={`badge ${ready ? 'ready' : ''}`}>
+            <ClockIcon size={13} />
+            {ready
+              ? 'Ready to play'
+              : onCooldown
+                ? `Next play in ${formatDuration(secondsLeft)}`
+                : '24h cooldown'}
+          </span>
+        }
+      />
 
       <p className='description'>
         Pick a number between 1 and 3. Guess correctly and earn 10 points.
       </p>
 
-      <div className='numberButtons'>
-        {GUESSES.map((number) => (
-          <button
-            key={number.toString()}
-            className={guess === number ? 'selected' : ''}
-            disabled={!canPlay}
-            onClick={() => setGuess(number)}
-          >
-            {number.toString()}
-          </button>
-        ))}
+      <div className='gameControls'>
+        <div className='numberButtons'>
+          {GUESSES.map((number) => (
+            <button
+              key={number.toString()}
+              className={guess === number ? 'selected' : ''}
+              disabled={!canPlay}
+              onClick={() => setGuess(number)}
+              aria-pressed={guess === number}
+            >
+              {number.toString()}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className='primaryButton playButton'
+          disabled={!canPlay || guess === undefined}
+          onClick={handlePlay}
+        >
+          {playTx.pending && <span className='spinner' aria-hidden='true' />}
+          {playTx.pending ? 'Playing...' : 'Play Game'}
+        </button>
       </div>
 
       {result && (
         <div className={`gameResult ${result.won ? 'won' : 'lost'}`}>
-          <strong>{result.won ? 'You won! +10 points' : 'Not this time'}</strong>
-          <span>
-            You guessed {result.guessedNumber.toString()}, the number was{' '}
-            {result.correctNumber.toString()}.
+          <span className='gameResultIcon'>
+            {result.won ? <CheckIcon size={18} /> : <CrossIcon size={18} />}
           </span>
+          <div>
+            <strong>{result.won ? 'You won! +10 points' : 'Not this time'}</strong>
+            <span>
+              You guessed {result.guessedNumber.toString()}, the number was{' '}
+              {result.correctNumber.toString()}.
+            </span>
+          </div>
         </div>
       )}
 
@@ -114,14 +134,6 @@ export function GameComponent({
       )}
       {playTx.pending && <p className='txHint'>Waiting for confirmation...</p>}
       {playTx.error && <p className='txError'>{playTx.error}</p>}
-
-      <button
-        className='primaryButton'
-        disabled={!canPlay || guess === undefined}
-        onClick={handlePlay}
-      >
-        {playTx.pending ? 'Playing...' : 'Play Game'}
-      </button>
     </div>
   );
 }

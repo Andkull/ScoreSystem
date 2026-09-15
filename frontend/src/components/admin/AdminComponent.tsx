@@ -5,6 +5,8 @@ import { useMemberLookup } from '../../hooks/useMemberLookup';
 import { useTransaction } from '../../hooks/useTransaction';
 import { shortenAddress } from '../../utils/format';
 import { parsePoints } from '../../utils/points';
+import { CardHeading } from '../ui/CardHeading';
+import { ShieldIcon } from '../ui/Icons';
 
 type AdminProps = {
   onGiven: () => void;
@@ -49,13 +51,12 @@ export function AdminComponent({ onGiven }: AdminProps) {
 
   return (
     <form className='card formCard adminCard' onSubmit={handleGive}>
-      <div className='cardHeader'>
-        <div>
-          <p className='cardLabel'>ADMIN</p>
-          <h2>Give Points</h2>
-        </div>
-        <span className='adminBadge'>Admin only</span>
-      </div>
+      <CardHeading
+        icon={<ShieldIcon />}
+        label='ADMIN'
+        title='Give Points'
+        aside={<span className='badge admin'>Admin only</span>}
+      />
 
       <p className='description'>
         Award points to any registered member. Only you, the contract admin,
@@ -104,6 +105,7 @@ export function AdminComponent({ onGiven }: AdminProps) {
       </div>
 
       <button type='submit' className='primaryButton' disabled={!canGive}>
+        {giveTx.pending && <span className='spinner' aria-hidden='true' />}
         {giveTx.pending ? 'Giving...' : 'Give Points'}
       </button>
 

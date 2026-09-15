@@ -1,8 +1,10 @@
 import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { anvil } from "viem/chains";
 
+export const chain = anvil;
+
 export const publicClient = createPublicClient({
-  chain: anvil,
+  chain,
   transport: http("http://127.0.0.1:8545"),
   // Anvil mines instantly, so poll for receipts faster than viem's 4s default.
   pollingInterval: 1_000,
@@ -21,7 +23,7 @@ export function getWalletClient() {
     );
   }
   return createWalletClient({
-    chain: anvil,
+    chain,
     transport: custom(window.ethereum),
   });
 }

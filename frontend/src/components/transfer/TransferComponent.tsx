@@ -8,6 +8,8 @@ import { useMemberLookup } from '../../hooks/useMemberLookup';
 import { useTransaction } from '../../hooks/useTransaction';
 import { shortenAddress } from '../../utils/format';
 import { parsePoints } from '../../utils/points';
+import { CardHeading } from '../ui/CardHeading';
+import { TransferIcon } from '../ui/Icons';
 
 type TransferProps = {
   address?: Address;
@@ -66,8 +68,7 @@ export function TransferComponent({
 
   return (
     <form className='card formCard transferCard' onSubmit={handleTransfer}>
-      <p className='cardLabel'>POINTS</p>
-      <h2>Transfer Points</h2>
+      <CardHeading icon={<TransferIcon />} label='POINTS' title='Transfer Points' />
 
       <p className='description'>
         Send some of your points to another registered member.
@@ -116,6 +117,7 @@ export function TransferComponent({
       {amountError && <p className='txError fieldMessage'>{amountError}</p>}
 
       <button type='submit' className='primaryButton' disabled={!canTransfer}>
+        {transferTx.pending && <span className='spinner' aria-hidden='true' />}
         {transferTx.pending ? 'Transferring...' : 'Transfer Points'}
       </button>
 

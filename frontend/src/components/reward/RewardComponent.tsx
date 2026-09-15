@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { Address } from 'viem';
 import { buyTshirt, type PlayerData } from '../../blockchain/contractFunctions';
 import { useTransaction } from '../../hooks/useTransaction';
+import { CardHeading } from '../ui/CardHeading';
+import { CheckIcon, ShirtIcon } from '../ui/Icons';
 
 type RewardProps = {
   address?: Address;
@@ -46,31 +48,42 @@ export function RewardComponent({
   }
 
   return (
-    <div id='rewards' className={`card rewardCard ${owned ? 'owned' : ''}`}>
-      <div className='rewardIcon'>👕</div>
+    <div className={`card rewardCard ${owned ? 'owned' : ''}`}>
+      <CardHeading
+        icon={owned ? <CheckIcon /> : <ShirtIcon />}
+        label='REWARD'
+        title={owned ? 'T-shirt claimed' : 'Win a T-shirt'}
+      />
 
-      <div>
-        <p className='cardLabel'>REWARD</p>
-        <h2>{owned ? 'T-shirt claimed' : 'Win a T-shirt'}</h2>
-        <p className='description'>
-          {owned
-            ? 'The exclusive T-shirt is yours. Thanks for playing!'
-            : `Redeem ${costText} points for your exclusive T-shirt.`}
-        </p>
+      <p className='description'>
+        {owned
+          ? 'The exclusive T-shirt is yours. Thanks for playing!'
+          : `Redeem ${costText} points for your exclusive T-shirt.`}
+      </p>
 
-        {registered && !owned && tshirtCost !== undefined && (
-          <div className='rewardProgress'>
-            <div className='rewardProgressBar'>
-              <div style={{ width: `${progressPercent}%` }} />
-            </div>
+      {registered && !owned && tshirtCost !== undefined && (
+        <div className='rewardProgress'>
+          <div className='rewardProgressHeader'>
+            <span>
+              <strong>{score.toString()}</strong> / {costText} points
+            </span>
             <span>
               {pointsNeeded > 0n
-                ? `${score.toString()} / ${costText} points, earn ${pointsNeeded.toString()} more`
-                : 'You have enough points!'}
+                ? `${pointsNeeded.toString()} to go`
+                : 'Ready to redeem'}
             </span>
           </div>
-        )}
-      </div>
+          <div
+            className='rewardProgressBar'
+            role='progressbar'
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent}
+          >
+            <div style={{ width: `${progressPercent}%` }} />
+          </div>
+        </div>
+      )}
 
       {!address && <p className='txHint'>Connect your wallet to redeem.</p>}
       {address && player && !registered && (
@@ -85,12 +98,15 @@ export function RewardComponent({
       )}
 
       <div className='rewardBottom'>
-        <span>Cost: {costText} points</span>
+        <span>
+          Cost <strong>{costText}</strong> points
+        </span>
         <button
-          className='secondaryButton'
+          className={owned ? 'secondaryButton' : 'primaryButton'}
           disabled={!canBuy}
           onClick={handleBuy}
         >
+          {buyTx.pending && <span className='spinner' aria-hidden='true' />}
           {buyTx.pending ? 'Buying...' : owned ? 'Claimed' : 'Buy T-shirt'}
         </button>
       </div>
