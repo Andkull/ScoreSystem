@@ -76,6 +76,17 @@ export async function registerPlayer() {
   return waitForConfirmation(await wallet.writeContract(request));
 }
 
+export async function transferPoints(to: Address, amount: bigint) {
+  const { wallet, account } = await getSigner();
+  const { request } = await publicClient.simulateContract({
+    ...scoreSystem,
+    functionName: "transferPoints",
+    args: [to, amount],
+    account,
+  });
+  return waitForConfirmation(await wallet.writeContract(request));
+}
+
 export async function playGame(guess: bigint): Promise<GameResult> {
   const { wallet, account } = await getSigner();
   const { request } = await publicClient.simulateContract({

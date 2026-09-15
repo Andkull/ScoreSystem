@@ -3,6 +3,7 @@ import { registerPlayer } from '../../blockchain/contractFunctions';
 import { usePlayerData } from '../../hooks/usePlayerData';
 import { useTransaction } from '../../hooks/useTransaction';
 import { GameComponent } from '../game/GameComponent';
+import { TransferComponent } from '../transfer/TransferComponent';
 
 type BodyProps = {
   address?: Address;
@@ -89,22 +90,11 @@ export function BodyComponent({ address }: BodyProps) {
             )}
           </div>
 
-          <div className='card transferCard'>
-            <p className='cardLabel'>POINTS</p>
-            <h2>Transfer Points</h2>
-
-            <p className='description'>
-              Send some of your points to another registered member.
-            </p>
-
-            <label>Member address</label>
-            <input type='text' placeholder='0x...' />
-
-            <label>Amount</label>
-            <input type='number' placeholder='Amount of points' />
-
-            <button className='primaryButton'>Transfer Points</button>
-          </div>
+          <TransferComponent
+            address={address}
+            player={player}
+            onTransferred={refresh}
+          />
 
           <div className='card rewardCard'>
             <div className='rewardIcon'>👕</div>

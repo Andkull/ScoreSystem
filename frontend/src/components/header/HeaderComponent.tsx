@@ -1,5 +1,6 @@
 import type { Address } from 'viem';
 import { hasWallet } from '../../blockchain/viem';
+import { shortenAddress } from '../../utils/format';
 
 type HeaderProps = {
   address?: Address;
@@ -38,7 +39,7 @@ export function HeaderComponent({ address, onConnect }: HeaderProps) {
 
         <button className='walletButton' onClick={handleConnect}>
           {address
-            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+            ? shortenAddress(address)
             : hasWallet() ? 'Connect Wallet' : 'No Wallet Found'}
         </button>
       </div>
