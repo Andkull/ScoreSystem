@@ -10,21 +10,17 @@ export function BodyComponent() {
   const [score, setScore] = useState<bigint>(0n);
   const [registered, setRegistered] = useState<boolean>(false);
   const [tshirtClaimed, setTshirtClaimed] = useState<boolean>(false);
-  const [lastPlayed, setLastPlayed] = useState<bigint>(0n);
-  const [userAddress, setUserAddress] = useState<`0x${string}` | undefined>();
 
   async function loadPlayerData() {
     if (!walletClient) return;
 
     const [address] = await walletClient.getAddresses();
-    setUserAddress(address);
     if (!address) return;
 
     const data = await getPlayerData(address);
     setScore(data[0]);
     setRegistered(data[1]);
     setTshirtClaimed(data[2]);
-    setLastPlayed(data[3]);
   }
 
   useEffect(() => {
