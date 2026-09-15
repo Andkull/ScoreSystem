@@ -1,75 +1,42 @@
-# React + TypeScript + Vite
+# ScoreSystem frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite app for the ScoreSystem contract, using [viem](https://viem.sh) to talk to the chain. See the [root README](../README.md) for the full local setup (Anvil, deploy, MetaMask).
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm ci          # install dependencies
+npm run dev     # start the dev server at http://localhost:5173
+npm run lint    # ESLint
+npm run build   # typecheck and production build into dist/
+npm run preview # serve the production build
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Structure
 
 ```
+src/
+  blockchain/
+    abi.ts                ScoreSystem ABI (typed with `as const`)
+    contract.ts           Deployed contract address
+    viem.ts               Chain, public client and wallet client
+    contractFunctions.ts  All contract reads and writes
+    errors.ts             Turns viem errors into short UI messages
+  hooks/
+    useWallet.ts          Connected account, follows wallet account changes
+    usePlayerData.ts      Player data for an address, with an awaitable refresh
+    useTransaction.ts     Pending state and error for one kind of write
+    useGameConfig.ts      Contract values fixed at deploy (admin, cooldown, T-shirt cost)
+    useMemberLookup.ts    Validates a typed address and checks membership on chain
+    useNow.ts             Ticking clock for the cooldown countdown
+  components/
+    header/  body/  game/  transfer/  reward/  admin/   One component per section
+    ui/                   Shared icons, card heading and address avatar
+  utils/                  Formatting and point parsing helpers
+```
+
+## Pointing at a different deployment
+
+- **Contract address:** `src/blockchain/contract.ts`
+- **Chain and RPC URL:** `src/blockchain/viem.ts`
+- **ABI:** after changing the contract, regenerate it with `forge inspect ScoreSystem abi --json` (run in `contracts/`) and update `src/blockchain/abi.ts`, keeping the `as const`.
