@@ -7,15 +7,16 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  FOUNDRY_PROFILE: ci
-
 jobs:
   check:
     name: Foundry project
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    defaults:
+      run:
+        # The Foundry project (foundry.toml, src, test, lib) lives in contracts/
+        working-directory: contracts
     steps:
       - uses: actions/checkout@v5
         with:
