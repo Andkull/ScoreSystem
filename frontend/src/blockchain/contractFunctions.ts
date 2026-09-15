@@ -15,8 +15,12 @@ export type PlayerData = {
   registered: boolean;
   wonTshirt: boolean;
   lastPlayed: bigint;
-  // Unix time in seconds when the cooldown ends; 0 if never played.
-  nextPlayAt: bigint;
+};
+
+// Contract constants, read once so the UI never drifts from the contract.
+export type GameConfig = {
+  cooldownTime: bigint;
+  tshirtCost: bigint;
 };
 
 export type GameResult = {
@@ -25,21 +29,22 @@ export type GameResult = {
   correctNumber: bigint;
 };
 
+export async function getGameConfig(): Promise<GameConfig> {
+  const [cooldownTime, tshirtCost] = await Promise.all([
+    publicClient.readContract({ ...scoreSystem, functionName: "COOLDOWN_TIME" }),
+    publicClient.readContract({ ...scoreSystem, functionName: "TSHIRT_COST" }),
+  ]);
+  return { cooldownTime, tshirtCost };
+}
+
 export async function getPlayerData(user: Address): Promise<PlayerData> {
-  const [[score, registered, wonTshirt, lastPlayed], cooldownTime] =
-    await Promise.all([
-      publicClient.readContract({
-        ...scoreSystem,
-        functionName: "getPlayerData",
-        args: [user],
-      }),
-      publicClient.readContract({
-        ...scoreSystem,
-        functionName: "COOLDOWN_TIME",
-      }),
-    ]);
-  const nextPlayAt = lastPlayed === 0n ? 0n : lastPlayed + cooldownTime;
-  return { score, registered, wonTshirt, lastPlayed, nextPlayAt };
+  const [score, registered, wonTshirt, lastPlayed] =
+    await publicClient.readContract({
+      ...scoreSystem,
+      functionName: "getPlayerData",
+      args: [user],
+    });
+  return { score, registered, wonTshirt, lastPlayed };
 }
 
 export async function connectWallet(): Promise<Address> {
@@ -71,6 +76,16 @@ export async function registerPlayer() {
   const { request } = await publicClient.simulateContract({
     ...scoreSystem,
     functionName: "register",
+    account,
+  });
+  return waitForConfirmation(await wallet.writeContract(request));
+}
+
+export async function buyTshirt() {
+  const { wallet, account } = await getSigner();
+  const { request } = await publicClient.simulateContract({
+    ...scoreSystem,
+    functionName: "buyTshirt",
     account,
   });
   return waitForConfirmation(await wallet.writeContract(request));

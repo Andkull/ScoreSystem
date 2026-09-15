@@ -1,8 +1,10 @@
 import type { Address } from 'viem';
 import { registerPlayer } from '../../blockchain/contractFunctions';
+import { useGameConfig } from '../../hooks/useGameConfig';
 import { usePlayerData } from '../../hooks/usePlayerData';
 import { useTransaction } from '../../hooks/useTransaction';
 import { GameComponent } from '../game/GameComponent';
+import { RewardComponent } from '../reward/RewardComponent';
 import { TransferComponent } from '../transfer/TransferComponent';
 
 type BodyProps = {
@@ -10,6 +12,7 @@ type BodyProps = {
 };
 
 export function BodyComponent({ address }: BodyProps) {
+  const config = useGameConfig();
   const { player, error: playerError, refresh } = usePlayerData(address);
   const registerTx = useTransaction();
 
@@ -43,7 +46,12 @@ export function BodyComponent({ address }: BodyProps) {
         </section>
 
         <section className='dashboard'>
-          <GameComponent address={address} player={player} onPlayed={refresh} />
+          <GameComponent
+            address={address}
+            player={player}
+            cooldownTime={config?.cooldownTime}
+            onPlayed={refresh}
+          />
 
           <div className='card profileCard'>
             <p className='cardLabel'>PLAYER</p>
@@ -96,22 +104,12 @@ export function BodyComponent({ address }: BodyProps) {
             onTransferred={refresh}
           />
 
-          <div className='card rewardCard'>
-            <div className='rewardIcon'>👕</div>
-
-            <div>
-              <p className='cardLabel'>REWARD</p>
-              <h2>Win a T-shirt</h2>
-              <p className='description'>
-                Redeem 50 points for your exclusive T-shirt.
-              </p>
-            </div>
-
-            <div className='rewardBottom'>
-              <span>Cost: 50 points</span>
-              <button className='secondaryButton'>Buy T-shirt</button>
-            </div>
-          </div>
+          <RewardComponent
+            address={address}
+            player={player}
+            tshirtCost={config?.tshirtCost}
+            onPurchased={refresh}
+          />
         </section>
       </main>
     </>

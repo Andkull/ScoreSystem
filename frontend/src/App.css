@@ -450,6 +450,39 @@ button:disabled:hover {
     margin: 0;
 }
 
+.rewardProgress {
+    margin-top: 18px;
+}
+
+.rewardProgressBar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #1b202a;
+}
+
+.rewardProgressBar div {
+    height: 100%;
+    border-radius: 999px;
+    background: #6d5dfc;
+    transition: width 0.4s ease;
+}
+
+.rewardProgress span {
+    display: block;
+    margin-top: 8px;
+    color: #8e97a8;
+    font-size: 12px;
+}
+
+.rewardCard.owned {
+    border-color: #245c41;
+}
+
+.rewardCard.owned .rewardIcon {
+    background: #14291f;
+}
+
 @media (max-width: 800px) {
     .navigation {
         display: none;

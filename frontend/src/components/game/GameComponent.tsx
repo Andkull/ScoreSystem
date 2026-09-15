@@ -11,6 +11,7 @@ import { useTransaction } from '../../hooks/useTransaction';
 type GameProps = {
   address?: Address;
   player?: PlayerData;
+  cooldownTime?: bigint;
   onPlayed: () => void;
 };
 
@@ -25,18 +26,29 @@ function formatDuration(totalSeconds: number) {
     : `${minutes}m ${seconds}s`;
 }
 
-export function GameComponent({ address, player, onPlayed }: GameProps) {
+export function GameComponent({
+  address,
+  player,
+  cooldownTime,
+  onPlayed,
+}: GameProps) {
   const [guess, setGuess] = useState<bigint>();
   const [result, setResult] = useState<GameResult>();
   const playTx = useTransaction();
   const now = useNow();
 
   const registered = player?.registered ?? false;
-  const secondsLeft = player
-    ? Math.max(0, Number(player.nextPlayAt) - Math.floor(now / 1000))
-    : 0;
+  const hasPlayed = (player?.lastPlayed ?? 0n) > 0n;
+  // A returning player's cooldown is unknown until the contract config loads.
+  const cooldownKnown = !hasPlayed || cooldownTime !== undefined;
+  const nextPlayAt =
+    player && hasPlayed && cooldownTime !== undefined
+      ? player.lastPlayed + cooldownTime
+      : 0n;
+  const secondsLeft = Math.max(0, Number(nextPlayAt) - Math.floor(now / 1000));
   const onCooldown = secondsLeft > 0;
-  const canPlay = registered && !onCooldown && !playTx.pending;
+  const ready = registered && cooldownKnown && !onCooldown;
+  const canPlay = ready && !playTx.pending;
 
   async function handlePlay() {
     if (guess === undefined) return;
@@ -57,12 +69,12 @@ export function GameComponent({ address, player, onPlayed }: GameProps) {
           <h2>Guess the Number</h2>
         </div>
 
-        <span className={`cooldown ${registered && !onCooldown ? 'ready' : ''}`}>
-          {!registered
-            ? '24h cooldown'
+        <span className={`cooldown ${ready ? 'ready' : ''}`}>
+          {ready
+            ? 'Ready to play'
             : onCooldown
               ? `Next play in ${formatDuration(secondsLeft)}`
-              : 'Ready to play'}
+              : '24h cooldown'}
         </span>
       </div>
 
