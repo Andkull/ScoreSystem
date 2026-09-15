@@ -9,7 +9,7 @@ import { CardHeading } from '../ui/CardHeading';
 import { ShieldIcon } from '../ui/Icons';
 
 type AdminProps = {
-  onGiven: () => void;
+  onGiven: () => Promise<void>;
 };
 
 // Only rendered for the contract admin; the contract enforces it regardless.
@@ -39,14 +39,17 @@ export function AdminComponent({ onGiven }: AdminProps) {
     if (!canGive || !member || amount === undefined) return;
 
     setGiven(undefined);
-    const receipt = await giveTx.run(() => adminGivePoints(member, amount));
+    const receipt = await giveTx.run(
+      () => adminGivePoints(member, amount),
+      async () => {
+        await Promise.all([refreshMember(), onGiven()]);
+      },
+    );
     if (receipt) {
       setGiven({ to: member, amount });
       // Keep the member selected so their updated balance shows.
       setAmountInput('');
     }
-    refreshMember();
-    onGiven();
   }
 
   return (

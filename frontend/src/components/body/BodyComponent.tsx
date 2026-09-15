@@ -45,8 +45,7 @@ export function BodyComponent({ address }: BodyProps) {
         : { text: 'Not registered', tone: 'warning' };
 
   async function handleRegister() {
-    await registerTx.run(registerPlayer);
-    refresh();
+    await registerTx.run(registerPlayer, refresh);
   }
 
   return (

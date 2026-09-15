@@ -14,7 +14,7 @@ type GameProps = {
   address?: Address;
   player?: PlayerData;
   cooldownTime?: bigint;
-  onPlayed: () => void;
+  onPlayed: () => Promise<void>;
 };
 
 const GUESSES = [1n, 2n, 3n];
@@ -55,12 +55,11 @@ export function GameComponent({
   async function handlePlay() {
     if (guess === undefined) return;
     setResult(undefined);
-    const outcome = await playTx.run(() => playGame(guess));
+    const outcome = await playTx.run(() => playGame(guess), onPlayed);
     if (outcome) {
       setResult(outcome);
       setGuess(undefined);
     }
-    onPlayed();
   }
 
   return (

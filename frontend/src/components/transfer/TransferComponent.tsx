@@ -14,7 +14,7 @@ import { TransferIcon } from '../ui/Icons';
 type TransferProps = {
   address?: Address;
   player?: PlayerData;
-  onTransferred: () => void;
+  onTransferred: () => Promise<void>;
 };
 
 export function TransferComponent({
@@ -55,15 +55,15 @@ export function TransferComponent({
     if (!canTransfer || !recipient || amount === undefined) return;
 
     setSent(undefined);
-    const receipt = await transferTx.run(() =>
-      transferPoints(recipient, amount),
+    const receipt = await transferTx.run(
+      () => transferPoints(recipient, amount),
+      onTransferred,
     );
     if (receipt) {
       setSent({ to: recipient, amount });
       setRecipientInput('');
       setAmountInput('');
     }
-    onTransferred();
   }
 
   return (

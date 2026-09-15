@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
 import {
   getPlayerData,
@@ -8,25 +8,30 @@ import { getErrorMessage } from "../blockchain/errors";
 
 type Result = { address: Address; data?: PlayerData; error?: string };
 
+async function loadPlayer(address: Address): Promise<Result> {
+  try {
+    return { address, data: await getPlayerData(address) };
+  } catch (err) {
+    return { address, error: getErrorMessage(err) };
+  }
+}
+
 export function usePlayerData(address?: Address) {
   const [result, setResult] = useState<Result>();
-  const [reloadKey, setReloadKey] = useState(0);
+  const addressRef = useRef(address);
 
   useEffect(() => {
+    addressRef.current = address;
     if (!address) return;
 
     let ignore = false;
-    getPlayerData(address)
-      .then((data) => {
-        if (!ignore) setResult({ address, data });
-      })
-      .catch((err) => {
-        if (!ignore) setResult({ address, error: getErrorMessage(err) });
-      });
+    loadPlayer(address).then((loaded) => {
+      if (!ignore) setResult(loaded);
+    });
     return () => {
       ignore = true;
     };
-  }, [address, reloadKey]);
+  }, [address]);
 
   // Ignore a result that belongs to a previously connected account.
   const current = result?.address === address ? result : undefined;
@@ -34,6 +39,11 @@ export function usePlayerData(address?: Address) {
   return {
     player: current?.data,
     error: current?.error,
-    refresh: () => setReloadKey((key) => key + 1),
+    // Resolves once fresh data is in state, so callers can wait for it.
+    refresh: async () => {
+      if (!address) return;
+      const loaded = await loadPlayer(address);
+      if (addressRef.current === address) setResult(loaded);
+    },
   };
 }

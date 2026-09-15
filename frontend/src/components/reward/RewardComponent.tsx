@@ -9,7 +9,7 @@ type RewardProps = {
   address?: Address;
   player?: PlayerData;
   tshirtCost?: bigint;
-  onPurchased: () => void;
+  onPurchased: () => Promise<void>;
 };
 
 export function RewardComponent({
@@ -42,9 +42,8 @@ export function RewardComponent({
 
   async function handleBuy() {
     setJustBought(false);
-    const receipt = await buyTx.run(buyTshirt);
+    const receipt = await buyTx.run(buyTshirt, onPurchased);
     if (receipt) setJustBought(true);
-    onPurchased();
   }
 
   return (
