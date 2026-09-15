@@ -153,5 +153,4 @@ export const scoreSystemAbi = [
     ],
     anonymous: false,
   },
-  ,
-];
+] as const;

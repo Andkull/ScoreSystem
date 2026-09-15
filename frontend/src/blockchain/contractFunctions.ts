@@ -1,72 +1,71 @@
-import { publicClient, walletClient } from "./viem";
+import type { Address, Hash, TransactionReceipt } from "viem";
+import { publicClient, getWalletClient } from "./viem";
 import { scoreSystemAddress } from "./contract";
 import { scoreSystemAbi } from "./abi";
 
-function requireWallet() {
-  if (!walletClient) {
-    throw new Error(
-      "No wallet extension detected. Please install MetaMask to connect.",
-    );
-  }
-  return walletClient;
+const scoreSystem = { address: scoreSystemAddress, abi: scoreSystemAbi } as const;
+
+export type PlayerData = {
+  score: bigint;
+  registered: boolean;
+  wonTshirt: boolean;
+  lastPlayed: bigint;
+};
+
+export async function getPlayerData(user: Address): Promise<PlayerData> {
+  const [score, registered, wonTshirt, lastPlayed] =
+    await publicClient.readContract({
+      ...scoreSystem,
+      functionName: "getPlayerData",
+      args: [user],
+    });
+  return { score, registered, wonTshirt, lastPlayed };
 }
 
-export async function getPlayerData(
-  userAddress: `0x${string}`,
-): Promise<[bigint, boolean, boolean, bigint]> {
-  return publicClient.readContract({
-    address: scoreSystemAddress,
-    abi: scoreSystemAbi,
-    functionName: "getPlayerData",
-    args: [userAddress],
-  }) as Promise<[bigint, boolean, boolean, bigint]>;
-}
-
-export async function registerPlayer(): Promise<`0x${string}`> {
-  const client = requireWallet();
-  const [account] = await client.getAddresses();
+export async function connectWallet(): Promise<Address> {
+  const [account] = await getWalletClient().requestAddresses();
   if (!account) throw new Error("No wallet account connected");
-
-  return client.writeContract({
-    address: scoreSystemAddress,
-    abi: scoreSystemAbi,
-    functionName: "register",
-    account,
-  });
-}
-
-export async function connectWallet(): Promise<`0x${string}`> {
-  const client = requireWallet();
-  const [account] = await client.requestAddresses();
-
-  console.log("CONNECTED ACCOUNT:", account);
-
-  if (!account) throw new Error("No wallet account connected");
-
   return account;
 }
 
-export async function playGame(guess: bigint): Promise<`0x${string}`> {
-  try {
-    const client = requireWallet();
-    const [account] = await client.getAddresses();
+async function getSigner() {
+  const wallet = getWalletClient();
+  const [account] = await wallet.getAddresses();
+  if (!account) throw new Error("Connect your wallet first");
+  return { wallet, account };
+}
 
-    if (!account) throw new Error("No wallet account connected");
-
-    const hash = await client.writeContract({
-      address: scoreSystemAddress,
-      abi: scoreSystemAbi,
-      functionName: "playGame",
-      args: [guess],
-      account,
-      gas: 100000n,
-    });
-
-    console.log("PLAY GAME TX:", hash);
-
-    return hash;
-  } catch (error) {
-    console.error("PLAY GAME FAILED:", error);
-    throw error;
+async function waitForConfirmation(hash: Hash): Promise<TransactionReceipt> {
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status === "reverted") {
+    throw new Error("Transaction reverted");
   }
+  return receipt;
+}
+
+// Every write simulates first so reverts surface with the contract's reason
+// before the wallet prompts, then waits for the transaction to be mined.
+
+export async function registerPlayer() {
+  const { wallet, account } = await getSigner();
+  const { request } = await publicClient.simulateContract({
+    ...scoreSystem,
+    functionName: "register",
+    account,
+  });
+  return waitForConfirmation(await wallet.writeContract(request));
+}
+
+export async function playGame(guess: bigint) {
+  const { wallet, account } = await getSigner();
+  const { request } = await publicClient.simulateContract({
+    ...scoreSystem,
+    functionName: "playGame",
+    args: [guess],
+    account,
+    // Fixed limit: the random result depends on block.timestamp, so gas
+    // estimation can pick the cheaper losing path and a win runs out of gas.
+    gas: 100_000n,
+  });
+  return waitForConfirmation(await wallet.writeContract(request));
 }

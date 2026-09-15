@@ -1,18 +1,19 @@
-import { connectWallet } from '../../blockchain/contractFunctions';
+import type { Address } from 'viem';
 import { hasWallet } from '../../blockchain/viem';
-import { useState } from 'react';
 
-export function HeaderComponent() {
-  const [walletAddress, setWalletAddress] = useState<`0x${string}` | undefined>();
+type HeaderProps = {
+  address?: Address;
+  onConnect: () => Promise<void>;
+};
 
+export function HeaderComponent({ address, onConnect }: HeaderProps) {
   async function handleConnect() {
-    if (!hasWallet) {
+    if (!hasWallet()) {
       alert('No wallet extension detected. Please install MetaMask to connect.');
       return;
     }
     try {
-      const address = await connectWallet();
-      setWalletAddress(address);
+      await onConnect();
     } catch (err) {
       console.error(err);
     }
@@ -36,9 +37,9 @@ export function HeaderComponent() {
         </nav>
 
         <button className='walletButton' onClick={handleConnect}>
-          {walletAddress
-            ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-            : hasWallet ? 'Connect Wallet' : 'No Wallet Found'}
+          {address
+            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+            : hasWallet() ? 'Connect Wallet' : 'No Wallet Found'}
         </button>
       </div>
     </header>

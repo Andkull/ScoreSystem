@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react';
-import {
-  getPlayerData,
-  registerPlayer,
-  playGame,
-} from '../../blockchain/contractFunctions';
-import { walletClient } from '../../blockchain/viem';
+import type { Address } from 'viem';
+import { registerPlayer, playGame } from '../../blockchain/contractFunctions';
+import { usePlayerData } from '../../hooks/usePlayerData';
+import { useTransaction } from '../../hooks/useTransaction';
 
-export function BodyComponent() {
-  const [score, setScore] = useState<bigint>(0n);
-  const [registered, setRegistered] = useState<boolean>(false);
-  const [tshirtClaimed, setTshirtClaimed] = useState<boolean>(false);
+type BodyProps = {
+  address?: Address;
+};
 
-  async function loadPlayerData() {
-    if (!walletClient) return;
+export function BodyComponent({ address }: BodyProps) {
+  const { player, error: playerError, refresh } = usePlayerData(address);
+  const registerTx = useTransaction();
+  const playTx = useTransaction();
 
-    const [address] = await walletClient.getAddresses();
-    if (!address) return;
+  const score = player?.score ?? 0n;
+  const registered = player?.registered ?? false;
+  const tshirtClaimed = player?.wonTshirt ?? false;
 
-    const data = await getPlayerData(address);
-    setScore(data[0]);
-    setRegistered(data[1]);
-    setTshirtClaimed(data[2]);
+  async function handleRegister() {
+    await registerTx.run(registerPlayer);
+    refresh();
   }
 
-  useEffect(() => {
-    loadPlayerData();
-  }, []);
+  async function handlePlay(guess: bigint) {
+    await playTx.run(() => playGame(guess));
+    refresh();
+  }
+
+  const canPlay = registered && !playTx.pending;
 
   return (
     <>
@@ -63,10 +64,17 @@ export function BodyComponent() {
             </p>
 
             <div className='numberButtons'>
-              <button onClick={() => playGame(1n)}>1</button>
-              <button onClick={() => playGame(2n)}>2</button>
-              <button onClick={() => playGame(3n)}>3</button>
+              <button disabled={!canPlay} onClick={() => handlePlay(1n)}>1</button>
+              <button disabled={!canPlay} onClick={() => handlePlay(2n)}>2</button>
+              <button disabled={!canPlay} onClick={() => handlePlay(3n)}>3</button>
             </div>
+
+            {!address && <p className='txHint'>Connect your wallet to play.</p>}
+            {address && player && !registered && (
+              <p className='txHint'>Register in your profile to play.</p>
+            )}
+            {playTx.pending && <p className='txHint'>Waiting for confirmation...</p>}
+            {playTx.error && <p className='txError'>{playTx.error}</p>}
 
             <button className='primaryButton'>Play Game</button>
           </div>
@@ -78,7 +86,13 @@ export function BodyComponent() {
             <div className='profileInfo'>
               <div>
                 <span>Status</span>
-                <strong>{registered ? 'Registered' : 'Not registered'}</strong>
+                <strong>
+                  {!address
+                    ? 'Wallet not connected'
+                    : registered
+                      ? 'Registered'
+                      : 'Not registered'}
+                </strong>
               </div>
 
               <div>
@@ -94,13 +108,20 @@ export function BodyComponent() {
 
             <button
               className='secondaryButton'
-              onClick={async () => {
-                await registerPlayer();
-                await loadPlayerData();
-              }}
+              disabled={!player || registered || registerTx.pending}
+              onClick={handleRegister}
             >
-              Register
+              {registerTx.pending
+                ? 'Registering...'
+                : registered
+                  ? 'Registered'
+                  : 'Register'}
             </button>
+
+            {registerTx.error && <p className='txError'>{registerTx.error}</p>}
+            {playerError && (
+              <p className='txError'>Could not load player data: {playerError}</p>
+            )}
           </div>
 
           <div className='card transferCard'>

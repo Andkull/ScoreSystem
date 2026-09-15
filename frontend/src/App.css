@@ -296,6 +296,34 @@ button {
     margin-top: 22px;
 }
 
+button:disabled,
+button:disabled:hover {
+    cursor: not-allowed;
+    opacity: 0.45;
+    transform: none;
+}
+
+.numberButtons button:disabled:hover {
+    border-color: #303846;
+    background: #171c25;
+}
+
+.txHint,
+.txError {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.txHint {
+    color: #818b9d;
+}
+
+.txError {
+    color: #ff7a85;
+    overflow-wrap: anywhere;
+}
+
 .transferCard {
     grid-column: 1;
 }
