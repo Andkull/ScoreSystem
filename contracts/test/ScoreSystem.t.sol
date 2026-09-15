@@ -16,11 +16,15 @@ contract ScoreSystemTest is Test {
         game = new ScoreSystem();
     }
 
+    function test_AdminIsDeployer() public view {
+        assertEq(game.admin(), admin);
+    }
+
     function test_Register() public {
         vm.prank(user1);
         game.register();
 
-        (uint256 score, bool isMember, bool wonTshirt, ) = game.getPlayerData(user1);
+        (uint256 score, bool isMember, bool wonTshirt,) = game.getPlayerData(user1);
         assertTrue(isMember);
         assertEq(score, 0);
         assertFalse(wonTshirt);

@@ -9,7 +9,7 @@ contract ScoreSystem {
         uint256 lastPlayed;
     }
 
-    address private admin;
+    address public admin;
     uint256 public constant TSHIRT_COST = 50;
     uint256 public constant COOLDOWN_TIME = 1 days;
 
@@ -48,8 +48,11 @@ contract ScoreSystem {
 
     function playGame(uint256 guess) external onlyMember {
         require(guess >= 1 && guess <= 3, "Guess must be 1, 2, or 3");
-        
-        require(players[msg.sender].lastPlayed == 0 || block.timestamp >= players[msg.sender].lastPlayed + COOLDOWN_TIME, "Cooldown active: You can only play once every 24 hours");
+
+        require(
+            players[msg.sender].lastPlayed == 0 || block.timestamp >= players[msg.sender].lastPlayed + COOLDOWN_TIME,
+            "Cooldown active: You can only play once every 24 hours"
+        );
 
         players[msg.sender].lastPlayed = block.timestamp;
 
