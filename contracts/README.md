@@ -49,4 +49,10 @@ To interact with the contract locally, you can start Foundry's local Ethereum no
 ```shell
 anvil
 ```
-Once Anvil is running, you can connect tools like Remix IDE to your local node to manually interact with the contract's functions, or use Foundry's built-in cast CLI.
+Once Anvil is running, deploy the contract with the included script. Anvil's accounts are unlocked, so no private key is needed; the sender becomes the contract admin:
+```shell
+forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --unlocked --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+On a fresh Anvil node this deploys to `0x5FbDB2315678afecb367f032d93F642f64180aa3`, the address the frontend expects. Restarting Anvil wipes the chain, so redeploy after every restart.
+
+You can also connect tools like Remix IDE to your local node to manually interact with the contract's functions, or use Foundry's built-in cast CLI.
