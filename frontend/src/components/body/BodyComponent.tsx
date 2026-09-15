@@ -1,7 +1,8 @@
 import type { Address } from 'viem';
-import { registerPlayer, playGame } from '../../blockchain/contractFunctions';
+import { registerPlayer } from '../../blockchain/contractFunctions';
 import { usePlayerData } from '../../hooks/usePlayerData';
 import { useTransaction } from '../../hooks/useTransaction';
+import { GameComponent } from '../game/GameComponent';
 
 type BodyProps = {
   address?: Address;
@@ -10,7 +11,6 @@ type BodyProps = {
 export function BodyComponent({ address }: BodyProps) {
   const { player, error: playerError, refresh } = usePlayerData(address);
   const registerTx = useTransaction();
-  const playTx = useTransaction();
 
   const score = player?.score ?? 0n;
   const registered = player?.registered ?? false;
@@ -20,13 +20,6 @@ export function BodyComponent({ address }: BodyProps) {
     await registerTx.run(registerPlayer);
     refresh();
   }
-
-  async function handlePlay(guess: bigint) {
-    await playTx.run(() => playGame(guess));
-    refresh();
-  }
-
-  const canPlay = registered && !playTx.pending;
 
   return (
     <>
@@ -49,35 +42,7 @@ export function BodyComponent({ address }: BodyProps) {
         </section>
 
         <section className='dashboard'>
-          <div className='card gameCard'>
-            <div className='cardHeader'>
-              <div>
-                <p className='cardLabel'>DAILY GAME</p>
-                <h2>Guess the Number</h2>
-              </div>
-
-              <span className='cooldown'>24h cooldown</span>
-            </div>
-
-            <p className='description'>
-              Pick a number between 1 and 3. Guess correctly and earn 10 points.
-            </p>
-
-            <div className='numberButtons'>
-              <button disabled={!canPlay} onClick={() => handlePlay(1n)}>1</button>
-              <button disabled={!canPlay} onClick={() => handlePlay(2n)}>2</button>
-              <button disabled={!canPlay} onClick={() => handlePlay(3n)}>3</button>
-            </div>
-
-            {!address && <p className='txHint'>Connect your wallet to play.</p>}
-            {address && player && !registered && (
-              <p className='txHint'>Register in your profile to play.</p>
-            )}
-            {playTx.pending && <p className='txHint'>Waiting for confirmation...</p>}
-            {playTx.error && <p className='txError'>{playTx.error}</p>}
-
-            <button className='primaryButton'>Play Game</button>
-          </div>
+          <GameComponent address={address} player={player} onPlayed={refresh} />
 
           <div className='card profileCard'>
             <p className='cardLabel'>PLAYER</p>

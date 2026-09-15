@@ -308,6 +308,44 @@ button:disabled:hover {
     background: #171c25;
 }
 
+.numberButtons button.selected {
+    border-color: #7d6cff;
+    background: #2a2556;
+    box-shadow: 0 0 0 1px #7d6cff;
+}
+
+.cooldown.ready {
+    background: #14291f;
+    color: #5fd49a;
+}
+
+.gameResult {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.gameResult strong {
+    font-size: 15px;
+}
+
+.gameResult.won {
+    border-color: #245c41;
+    background: #11241b;
+    color: #5fd49a;
+}
+
+.gameResult.lost {
+    border-color: #303846;
+    background: #171c25;
+    color: #b4bccb;
+}
+
 .txHint,
 .txError {
     margin-top: 14px;

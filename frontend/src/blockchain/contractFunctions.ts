@@ -1,4 +1,9 @@
-import type { Address, Hash, TransactionReceipt } from "viem";
+import {
+  parseEventLogs,
+  type Address,
+  type Hash,
+  type TransactionReceipt,
+} from "viem";
 import { publicClient, getWalletClient } from "./viem";
 import { scoreSystemAddress } from "./contract";
 import { scoreSystemAbi } from "./abi";
@@ -10,16 +15,31 @@ export type PlayerData = {
   registered: boolean;
   wonTshirt: boolean;
   lastPlayed: bigint;
+  // Unix time in seconds when the cooldown ends; 0 if never played.
+  nextPlayAt: bigint;
+};
+
+export type GameResult = {
+  won: boolean;
+  guessedNumber: bigint;
+  correctNumber: bigint;
 };
 
 export async function getPlayerData(user: Address): Promise<PlayerData> {
-  const [score, registered, wonTshirt, lastPlayed] =
-    await publicClient.readContract({
-      ...scoreSystem,
-      functionName: "getPlayerData",
-      args: [user],
-    });
-  return { score, registered, wonTshirt, lastPlayed };
+  const [[score, registered, wonTshirt, lastPlayed], cooldownTime] =
+    await Promise.all([
+      publicClient.readContract({
+        ...scoreSystem,
+        functionName: "getPlayerData",
+        args: [user],
+      }),
+      publicClient.readContract({
+        ...scoreSystem,
+        functionName: "COOLDOWN_TIME",
+      }),
+    ]);
+  const nextPlayAt = lastPlayed === 0n ? 0n : lastPlayed + cooldownTime;
+  return { score, registered, wonTshirt, lastPlayed, nextPlayAt };
 }
 
 export async function connectWallet(): Promise<Address> {
@@ -56,7 +76,7 @@ export async function registerPlayer() {
   return waitForConfirmation(await wallet.writeContract(request));
 }
 
-export async function playGame(guess: bigint) {
+export async function playGame(guess: bigint): Promise<GameResult> {
   const { wallet, account } = await getSigner();
   const { request } = await publicClient.simulateContract({
     ...scoreSystem,
@@ -67,5 +87,17 @@ export async function playGame(guess: bigint) {
     // estimation can pick the cheaper losing path and a win runs out of gas.
     gas: 100_000n,
   });
-  return waitForConfirmation(await wallet.writeContract(request));
+  const receipt = await waitForConfirmation(
+    await wallet.writeContract(request),
+  );
+
+  const [event] = parseEventLogs({
+    abi: scoreSystemAbi,
+    eventName: "GamePlayed",
+    logs: receipt.logs,
+  });
+  if (!event) throw new Error("Game result missing from transaction");
+
+  const { won, guessedNumber, correctNumber } = event.args;
+  return { won, guessedNumber, correctNumber };
 }

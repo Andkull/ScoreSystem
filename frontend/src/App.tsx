@@ -8,7 +8,8 @@ function App() {
 
   return <>
   <HeaderComponent address={address} onConnect={connect}></HeaderComponent>
-  <BodyComponent address={address}></BodyComponent>
+  {/* Keyed by account so results and errors reset when the wallet switches */}
+  <BodyComponent key={address} address={address}></BodyComponent>
   </>
 }
 

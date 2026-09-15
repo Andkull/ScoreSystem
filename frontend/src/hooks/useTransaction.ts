@@ -6,11 +6,12 @@ export function useTransaction() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
 
-  async function run(action: () => Promise<unknown>) {
+  // Resolves to the action's result, or undefined if it failed.
+  async function run<T>(action: () => Promise<T>): Promise<T | undefined> {
     setPending(true);
     setError(undefined);
     try {
-      await action();
+      return await action();
     } catch (err) {
       console.error(err);
       setError(getErrorMessage(err));
