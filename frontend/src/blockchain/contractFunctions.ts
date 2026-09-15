@@ -17,8 +17,9 @@ export type PlayerData = {
   lastPlayed: bigint;
 };
 
-// Contract constants, read once so the UI never drifts from the contract.
+// Values fixed at deploy, read once so the UI never drifts from the contract.
 export type GameConfig = {
+  admin: Address;
   cooldownTime: bigint;
   tshirtCost: bigint;
 };
@@ -30,11 +31,12 @@ export type GameResult = {
 };
 
 export async function getGameConfig(): Promise<GameConfig> {
-  const [cooldownTime, tshirtCost] = await Promise.all([
+  const [admin, cooldownTime, tshirtCost] = await Promise.all([
+    publicClient.readContract({ ...scoreSystem, functionName: "admin" }),
     publicClient.readContract({ ...scoreSystem, functionName: "COOLDOWN_TIME" }),
     publicClient.readContract({ ...scoreSystem, functionName: "TSHIRT_COST" }),
   ]);
-  return { cooldownTime, tshirtCost };
+  return { admin, cooldownTime, tshirtCost };
 }
 
 export async function getPlayerData(user: Address): Promise<PlayerData> {
@@ -76,6 +78,17 @@ export async function registerPlayer() {
   const { request } = await publicClient.simulateContract({
     ...scoreSystem,
     functionName: "register",
+    account,
+  });
+  return waitForConfirmation(await wallet.writeContract(request));
+}
+
+export async function adminGivePoints(to: Address, amount: bigint) {
+  const { wallet, account } = await getSigner();
+  const { request } = await publicClient.simulateContract({
+    ...scoreSystem,
+    functionName: "adminGivePoints",
+    args: [to, amount],
     account,
   });
   return waitForConfirmation(await wallet.writeContract(request));

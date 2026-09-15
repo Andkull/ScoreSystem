@@ -366,7 +366,7 @@ button:disabled:hover {
     grid-column: 1;
 }
 
-.transferCard label {
+.formCard label {
     display: block;
     margin-top: 20px;
     margin-bottom: 7px;
@@ -374,7 +374,7 @@ button:disabled:hover {
     font-size: 12px;
 }
 
-.transferCard input {
+.formCard input {
     width: 100%;
     padding: 12px 14px;
 
@@ -386,20 +386,20 @@ button:disabled:hover {
     color: white;
 }
 
-.transferCard input:focus {
+.formCard input:focus {
     border-color: #6d5dfc;
 }
 
-.transferCard input::placeholder {
+.formCard input::placeholder {
     color: #535c6b;
 }
 
-.transferCard input:disabled {
+.formCard input:disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
 
-.transferCard .fieldMessage {
+.formCard .fieldMessage {
     margin-top: 7px;
     font-size: 12px;
 }
@@ -483,6 +483,26 @@ button:disabled:hover {
     background: #14291f;
 }
 
+.adminCard {
+    grid-column: 1 / -1;
+    border-color: #3a3170;
+}
+
+.adminBadge {
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #1d1b31;
+    color: #a99dff;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.adminFields {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0 20px;
+}
+
 @media (max-width: 800px) {
     .navigation {
         display: none;
@@ -502,8 +522,13 @@ button:disabled:hover {
     }
 
     .transferCard,
-    .rewardCard {
+    .rewardCard,
+    .adminCard {
         grid-column: auto;
+    }
+
+    .adminFields {
+        grid-template-columns: 1fr;
     }
 }
 

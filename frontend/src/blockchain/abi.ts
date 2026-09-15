@@ -16,6 +16,13 @@ export const scoreSystemAbi = [
   },
   {
     type: 'function',
+    name: 'admin',
+    inputs: [],
+    outputs: [{ name: '', type: 'address', internalType: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'adminGivePoints',
     inputs: [
       { name: 'to', type: 'address', internalType: 'address' },

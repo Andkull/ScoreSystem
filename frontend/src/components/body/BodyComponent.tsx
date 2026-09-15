@@ -1,8 +1,9 @@
-import type { Address } from 'viem';
+import { isAddressEqual, type Address } from 'viem';
 import { registerPlayer } from '../../blockchain/contractFunctions';
 import { useGameConfig } from '../../hooks/useGameConfig';
 import { usePlayerData } from '../../hooks/usePlayerData';
 import { useTransaction } from '../../hooks/useTransaction';
+import { AdminComponent } from '../admin/AdminComponent';
 import { GameComponent } from '../game/GameComponent';
 import { RewardComponent } from '../reward/RewardComponent';
 import { TransferComponent } from '../transfer/TransferComponent';
@@ -19,6 +20,9 @@ export function BodyComponent({ address }: BodyProps) {
   const score = player?.score ?? 0n;
   const registered = player?.registered ?? false;
   const tshirtClaimed = player?.wonTshirt ?? false;
+  const isAdmin = Boolean(
+    address && config && isAddressEqual(address, config.admin),
+  );
 
   async function handleRegister() {
     await registerTx.run(registerPlayer);
@@ -110,6 +114,8 @@ export function BodyComponent({ address }: BodyProps) {
             tshirtCost={config?.tshirtCost}
             onPurchased={refresh}
           />
+
+          {isAdmin && <AdminComponent onGiven={refresh} />}
         </section>
       </main>
     </>

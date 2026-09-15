@@ -1,25 +1,19 @@
 import { useState, type FormEvent } from 'react';
-import { isAddress, isAddressEqual, type Address } from 'viem';
+import type { Address } from 'viem';
 import {
   transferPoints,
   type PlayerData,
 } from '../../blockchain/contractFunctions';
-import { usePlayerData } from '../../hooks/usePlayerData';
+import { useMemberLookup } from '../../hooks/useMemberLookup';
 import { useTransaction } from '../../hooks/useTransaction';
 import { shortenAddress } from '../../utils/format';
+import { parsePoints } from '../../utils/points';
 
 type TransferProps = {
   address?: Address;
   player?: PlayerData;
   onTransferred: () => void;
 };
-
-// Whole number of points greater than zero, or undefined if invalid.
-function parseAmount(value: string) {
-  if (!/^\d+$/.test(value)) return undefined;
-  const amount = BigInt(value);
-  return amount > 0n ? amount : undefined;
-}
 
 export function TransferComponent({
   address,
@@ -34,30 +28,14 @@ export function TransferComponent({
   const registered = player?.registered ?? false;
   const score = player?.score ?? 0n;
 
-  const recipientText = recipientInput.trim();
-  const recipient = isAddress(recipientText) ? recipientText : undefined;
-  const isSelf = Boolean(
-    recipient && address && isAddressEqual(recipient, address),
-  );
-  // Look up the receiver once a full, valid address has been entered.
-  const { player: recipientData } = usePlayerData(
-    isSelf ? undefined : recipient,
+  const { member: recipient, error: recipientError } = useMemberLookup(
+    recipientInput,
+    address,
   );
 
-  const amountText = amountInput.trim();
-  const amount = parseAmount(amountText);
-
-  let recipientError: string | undefined;
-  if (recipientText && !recipient) {
-    recipientError = 'Enter a valid address (0x followed by 40 hex characters).';
-  } else if (isSelf) {
-    recipientError = "That's your own address.";
-  } else if (recipientData && !recipientData.registered) {
-    recipientError = "This address isn't a registered member.";
-  }
-
+  const amount = parsePoints(amountInput);
   let amountError: string | undefined;
-  if (amountText && amount === undefined) {
+  if (amountInput.trim() && amount === undefined) {
     amountError = 'Enter a whole number of points greater than 0.';
   } else if (amount !== undefined && amount > score) {
     amountError = `You only have ${score.toString()} points.`;
@@ -65,8 +43,7 @@ export function TransferComponent({
 
   const canTransfer =
     registered &&
-    recipientData?.registered === true &&
-    !isSelf &&
+    recipient !== undefined &&
     amount !== undefined &&
     amount <= score &&
     !transferTx.pending;
@@ -88,7 +65,7 @@ export function TransferComponent({
   }
 
   return (
-    <form className='card transferCard' onSubmit={handleTransfer}>
+    <form className='card formCard transferCard' onSubmit={handleTransfer}>
       <p className='cardLabel'>POINTS</p>
       <h2>Transfer Points</h2>
 
@@ -120,9 +97,7 @@ export function TransferComponent({
       {recipientError && (
         <p className='txError fieldMessage'>{recipientError}</p>
       )}
-      {recipientData?.registered && !isSelf && (
-        <p className='fieldOk fieldMessage'>Registered member</p>
-      )}
+      {recipient && <p className='fieldOk fieldMessage'>Registered member</p>}
 
       <label htmlFor='transferAmount'>Amount</label>
       <input
