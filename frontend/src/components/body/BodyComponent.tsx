@@ -57,7 +57,7 @@ export function BodyComponent({ address }: BodyProps) {
             onPlayed={refresh}
           />
 
-          <div className='card profileCard'>
+          <div id='profile' className='card profileCard'>
             <p className='cardLabel'>PLAYER</p>
             <h2>Your Profile</h2>
 

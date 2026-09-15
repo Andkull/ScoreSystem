@@ -62,7 +62,7 @@ export function GameComponent({
   }
 
   return (
-    <div className='card gameCard'>
+    <div id='game' className='card gameCard'>
       <div className='cardHeader'>
         <div>
           <p className='cardLabel'>DAILY GAME</p>

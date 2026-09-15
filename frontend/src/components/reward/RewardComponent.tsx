@@ -46,7 +46,7 @@ export function RewardComponent({
   }
 
   return (
-    <div className={`card rewardCard ${owned ? 'owned' : ''}`}>
+    <div id='rewards' className={`card rewardCard ${owned ? 'owned' : ''}`}>
       <div className='rewardIcon'>👕</div>
 
       <div>
